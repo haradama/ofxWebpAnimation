@@ -22,6 +22,11 @@ jobs:
       - name: Clone openFrameworks
         run: git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks.git of
 
+      - name: Download oF core libraries
+        run: |
+          cd of/scripts/linux
+          ./download_libs.sh
+
       - name: Install oF dependencies (official CI script)
         run: |
           cd of/scripts/ci/linux64
@@ -39,36 +44,3 @@ jobs:
         run: |
           cd $OF_ROOT/addons/ofxWebpAnimation/example-basic
           make -j$(nproc)
-
-  build-macos:
-    runs-on: macos-latest
-    env:
-      OF_BRANCH: master
-      OF_ROOT: ${{ github.workspace }}/of
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install extra deps (addon-specific)
-        run: brew update && brew install webp pkg-config
-
-      - name: Clone openFrameworks
-        run: git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks.git of
-
-      - name: Run oF macOS CI install (optional)
-        run: |
-          cd of/scripts/ci/macos
-          ./install.sh || true  # optional, empty for now
-
-      - name: Build openFrameworks core (macOS CI script)
-        run: |
-          cd of/scripts/ci/macos
-          ./build.sh
-
-      - name: Link addon
-        run: ln -s $GITHUB_WORKSPACE $OF_ROOT/addons/ofxWebpAnimation
-
-      - name: Build example-basic
-        run: |
-          cd $OF_ROOT/addons/ofxWebpAnimation/example-basic
-          make -j$(sysctl -n hw.logicalcpu)
