@@ -16,25 +16,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install extra deps (addon-specific)
+        run: sudo apt-get update && sudo apt-get install -y libwebp-dev pkg-config
+
       - name: Clone openFrameworks
-        run: |
-          git clone --depth=1 https://github.com/openframeworks/openFrameworks.git $OF_ROOT
-          ls $OF_ROOT
+        run: git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks.git of
 
-      - name: Install dependencies
+      - name: Install oF dependencies (official CI script)
         run: |
-          cd $OF_ROOT/scripts/linux/ubuntu
-          sudo ./install_dependencies.sh -y
-          sudo apt-get install -y webp pkg-config
+          cd of/scripts/ci/linux64
+          ./install.sh
 
-      - name: Download openFrameworks libs
+      - name: Build openFrameworks core (official CI script)
         run: |
-          cd $OF_ROOT/scripts/linux
-          ./download_libs.sh
+          cd of/scripts/ci/linux64
+          ./build.sh
 
       - name: Link addon
-        run: |
-          ln -s $GITHUB_WORKSPACE $OF_ROOT/addons/ofxWebpAnimation
+        run: ln -s $GITHUB_WORKSPACE $OF_ROOT/addons/ofxWebpAnimation
 
       - name: Build example-basic
         run: |
@@ -50,24 +49,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install extra deps (addon-specific)
+        run: brew update && brew install webp pkg-config
+
       - name: Clone openFrameworks
-        run: |
-          git clone --depth=1 https://github.com/openframeworks/openFrameworks.git $OF_ROOT
-          ls $OF_ROOT
+        run: git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks.git of
 
-      - name: Install dependencies (homebrew)
+      - name: Run oF macOS CI install (optional)
         run: |
-          brew update
-          brew install webp pkg-config
+          cd of/scripts/ci/macos
+          ./install.sh || true  # optional, empty for now
 
-      - name: Download openFrameworks libraries
+      - name: Build openFrameworks core (macOS CI script)
         run: |
-          cd $OF_ROOT/scripts/osx
-          ./download_libs.sh
+          cd of/scripts/ci/macos
+          ./build.sh
 
       - name: Link addon
-        run: |
-          ln -s $GITHUB_WORKSPACE $OF_ROOT/addons/ofxWebpAnimation
+        run: ln -s $GITHUB_WORKSPACE $OF_ROOT/addons/ofxWebpAnimation
 
       - name: Build example-basic
         run: |
