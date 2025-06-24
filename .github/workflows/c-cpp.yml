@@ -20,25 +20,27 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libwebp-dev pkg-config
 
       - name: Clone openFrameworks
-        run: git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks.git of
+        run: git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks.git ${OF_ROOT}
 
       - name: Download oF core libraries
         run: |
-          cd of/scripts/linux
+          cd ${OF_ROOT}/scripts/linux
           ./download_libs.sh
 
       - name: Install oF dependencies (official CI script)
         run: |
-          cd of/scripts/ci/linux64
+          cd ${OF_ROOT}/scripts/ci/linux64
           ./install.sh
 
       - name: Build openFrameworks core (official CI script)
         run: |
-          cd of/scripts/ci/linux64
+          cd ${OF_ROOT}/scripts/ci/linux64
           ./build.sh
 
-      - name: Build example-basic
+      - name: Build example
         run: |
-          ln -s $GITHUB_WORKSPACE $OF_ROOT/addons/ofxWebpAnimation
-          cd $OF_ROOT/addons/ofxWebpAnimation/example-basic
+          shopt -s extglob
+          mkdir -p ${OF_ROOT}/addons/ofxWebpAnimation
+          cp -r !($(basename ${OF_ROOT})) ${OF_ROOT}/addons/ofxWebpAnimation/
+          cd ${OF_ROOT}/addons/ofxWebpAnimation/example-basic
           make -j$(nproc)
