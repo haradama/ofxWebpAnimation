@@ -37,10 +37,8 @@ jobs:
           cd of/scripts/ci/linux64
           ./build.sh
 
-      - name: Link addon
-        run: ln -s $GITHUB_WORKSPACE $OF_ROOT/addons/ofxWebpAnimation
-
       - name: Build example-basic
         run: |
+          ln -s $GITHUB_WORKSPACE $OF_ROOT/addons/ofxWebpAnimation
           cd $OF_ROOT/addons/ofxWebpAnimation/example-basic
           make -j$(nproc)
