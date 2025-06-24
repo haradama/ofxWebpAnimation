@@ -7,17 +7,58 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  build-linux:
     runs-on: ubuntu-latest
+    env:
+      TARGET: linux64
+      OF_BRANCH: master
 
     steps:
-    - uses: actions/checkout@v4
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebp-dev pkg-config
+
+      - name: Clone openFrameworks
+        run: |
+          cd $HOME
+          git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks
+
+      - name: Link addon into openFrameworks/addons
+        run: |
+          ln -s $GITHUB_WORKSPACE $HOME/openFrameworks/addons/ofxWebpAnimation
+
+      - name: Build example-basic
+        run: |
+          cd $HOME/openFrameworks/addons/ofxWebpAnimation/example-basic
+          make -j$(nproc)
+
+  build-macos:
+    runs-on: macos-latest
+    env:
+      TARGET: osx
+      OF_BRANCH: master
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install webp pkg-config
+
+      - name: Clone openFrameworks
+        run: |
+          cd $HOME
+          git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks
+
+      - name: Link addon into openFrameworks/addons
+        run: |
+          ln -s $GITHUB_WORKSPACE $HOME/openFrameworks/addons/ofxWebpAnimation
+
+      - name: Build example-basic
+        run: |
+          cd $HOME/openFrameworks/addons/ofxWebpAnimation/example-basic
+          make -j$(sysctl -n hw.logicalcpu)
