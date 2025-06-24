@@ -16,19 +16,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebp-dev pkg-config libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxinerama-dev libxxf86vm-dev libxft-dev libxext-dev libxfixes-dev libxcomposite-dev libasound2-dev libpulse-dev libudev-dev
-
       - name: Clone openFrameworks
         run: |
-          git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks.git of
+          git clone --depth=1 https://github.com/openframeworks/openFrameworks.git $OF_ROOT
+          ls $OF_ROOT
 
-      - name: Build openFrameworks core
+      - name: Install dependencies
         run: |
-          cd of/scripts/linux
-          ./compileOF.sh -j$(nproc)
+          cd $OF_ROOT/scripts/linux/ubuntu
+          sudo ./install_dependencies.sh -y
+          sudo apt-get install -y webp pkg-config
+
+      - name: Download openFrameworks libs
+        run: |
+          cd $OF_ROOT/scripts/linux
+          ./download_libs.sh
 
       - name: Link addon
         run: |
@@ -48,19 +50,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Clone openFrameworks
+        run: |
+          git clone --depth=1 https://github.com/openframeworks/openFrameworks.git $OF_ROOT
+          ls $OF_ROOT
+
+      - name: Install dependencies (homebrew)
         run: |
           brew update
           brew install webp pkg-config
 
-      - name: Clone openFrameworks
+      - name: Download openFrameworks libraries
         run: |
-          git clone --depth=1 --branch=${OF_BRANCH} https://github.com/openframeworks/openFrameworks.git of
-
-      - name: Build openFrameworks core
-        run: |
-          cd of/scripts/osx
-          ./compileOF.sh -j$(sysctl -n hw.logicalcpu)
+          cd $OF_ROOT/scripts/osx
+          ./download_libs.sh
 
       - name: Link addon
         run: |
